@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@v3.29.2
+
+      - name: Install dependencies
+        run: |
+          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz
+          tar -xvf clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz
+          include_directories(${CMAKE_CURRENT_SOURCE_DIR}/clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-22.04/include)
+
+      - name: Run build script
+        run: tools/build.sh
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install cmake-format
+
+      - name: Run format script
+        run: tools/format.sh
+
+      - name: Check for uncommitted changes after formatting
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Code format issues detected. Run tools/format.sh and commit the changes."
+            git diff
+            exit 1
+          fi
