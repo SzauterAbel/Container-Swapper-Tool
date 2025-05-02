@@ -8,25 +8,28 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up CMake
-        uses: lukka/get-cmake@v3.29.2
-
       - name: Install dependencies
         run: |
-          wget https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz
-          tar -xvf clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz
-          include_directories(${CMAKE_CURRENT_SOURCE_DIR}/clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-22.04/include)
+          sudo apt-get remove clang-* llvm-*
+          sudo apt-get update && sudo apt-get install -y clang-14 llvm-14 libclang-14-dev cmake git
+
+      - name: Set up Clang and cmake
+        run: |
+          export CC=/usr/bin/clang-14
+          export CXX=/usr/bin/clang++-14
+          export LDFLAGS="-L/usr/lib/llvm-14/lib"
+          export CXXFLAGS="-I/usr/lib/llvm-14/include -frtti"
 
       - name: Run build script
         run: tools/build.sh
 
   format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

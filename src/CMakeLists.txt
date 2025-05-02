@@ -22,6 +22,8 @@ FetchContent_MakeAvailable(spdlog)
 find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
 
+include_directories(/usr/lib/llvm-14/include/)
+
 set(SOURCE main.cpp Config.cpp Checker.cpp ContainerMatch.cpp MatchHandler.cpp
            Mode.cpp)
 
